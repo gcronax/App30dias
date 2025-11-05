@@ -4,7 +4,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,6 +32,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,37 +64,47 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Aux( modifier: Modifier = Modifier) {
-    Column (modifier=modifier){
+    Column (
+        modifier=modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ){
     Text(
         text =  "30 Days of random things",
         style = MaterialTheme.typography.titleMedium,
     )
-    var count = 1
 
     LazyColumn (
         modifier = modifier.fillMaxSize(),
 
         ) {
         items(DataSource.topics.size) { index ->
+            var expanded by remember { mutableStateOf(false) }
+
             Card(
                 modifier = Modifier
                     .padding(end = 30.dp, start = 30.dp, top = 15.dp, bottom = 15.dp)
 //                    .wrapContentHeight()
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    .clickable(onClick = {expanded = !expanded})
+                ,
                 shape = RoundedCornerShape(12.dp),
                 elevation = CardDefaults.cardElevation(4.dp)
             ) {
-
                 Column (
-                    modifier = Modifier.fillMaxWidth()
-//                        .height(68.dp)
+                    modifier = Modifier.fillMaxWidth().padding(10.dp)
+                        .animateContentSize(
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioNoBouncy,
+                            stiffness = Spring.StiffnessLow
+                        )
+                    )
                     ,
-                    horizontalAlignment = Alignment.CenterHorizontally,
+//                    horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
 
                     ) {
                     Text(
-                        text =  "Day ${count++}",
+                        text =  "Day ${index+1}",
                         style = MaterialTheme.typography.bodyMedium,
                     )
                     Text(
@@ -102,12 +120,14 @@ fun Aux( modifier: Modifier = Modifier) {
                         contentScale = ContentScale.Crop
                     )
 
-                    Spacer(modifier = Modifier.width(16.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
+                    if (expanded){
+                        Text(
+                            text = DataSource.topics[index].description,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
 
-                    Text(
-                        text = DataSource.topics[index].description,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
 
 
                 }
